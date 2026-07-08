@@ -4,65 +4,13 @@ const sequelize = require("../config/db");
 const User = require("./user");
 const Project = require("./project");
 
-const WeeklyReport = sequelize.define(
-  "WeeklyReport",
+const UserProject = sequelize.define(
+  "UserProject",
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
-    },
-
-    weekStartDate: {
-      type: DataTypes.DATEONLY,
-      allowNull: false,
-    },
-
-    weekEndDate: {
-      type: DataTypes.DATEONLY,
-      allowNull: false,
-    },
-
-    tasksCompleted: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
-
-    tasksPlanned: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
-
-    blockers: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-
-    hoursWorked: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-      validate: {
-        min: {
-          args: [0],
-          msg: "Hours worked cannot be negative",
-        },
-      },
-    },
-
-    notes: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-
-    status: {
-      type: DataTypes.ENUM("DRAFT", "SUBMITTED"),
-      allowNull: false,
-      defaultValue: "DRAFT",
-    },
-
-    submittedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
     },
 
     userId: {
@@ -73,7 +21,7 @@ const WeeklyReport = sequelize.define(
         key: "id",
       },
       onUpdate: "CASCADE",
-      onDelete: "RESTRICT",
+      onDelete: "CASCADE",
     },
 
     projectId: {
@@ -84,38 +32,40 @@ const WeeklyReport = sequelize.define(
         key: "id",
       },
       onUpdate: "CASCADE",
-      onDelete: "RESTRICT",
+      onDelete: "CASCADE",
     },
   },
   {
-    tableName: "weekly_reports",
+    tableName: "user_projects",
     timestamps: true,
     indexes: [
       {
         unique: true,
-        name: "unique_user_project_week",
-        fields: ["userId", "projectId", "weekStartDate"],
-      },
-      {
-        name: "idx_weekly_reports_status",
-        fields: ["status"],
-      },
-      {
-        name: "idx_weekly_reports_week_start",
-        fields: ["weekStartDate"],
+        name: "unique_user_project_assignment",
+        fields: ["userId", "projectId"],
       },
     ],
   }
 );
 
-WeeklyReport.belongsTo(User, {
+UserProject.belongsTo(User, {
   foreignKey: "userId",
   as: "user",
 });
 
-WeeklyReport.belongsTo(Project, {
+UserProject.belongsTo(Project, {
   foreignKey: "projectId",
   as: "project",
 });
 
-module.exports = WeeklyReport;
+User.hasMany(UserProject, {
+  foreignKey: "userId",
+  as: "projectAssignments",
+});
+
+Project.hasMany(UserProject, {
+  foreignKey: "projectId",
+  as: "memberAssignments",
+});
+
+module.exports = UserProject;
