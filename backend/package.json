@@ -22,7 +22,6 @@
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.11.0",
     "mysql2": "^3.22.5",
-    "openai": "^6.45.0",
     "sequelize": "^6.37.8"
   },
   "devDependencies": {

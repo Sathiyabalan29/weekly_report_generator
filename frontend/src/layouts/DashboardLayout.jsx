@@ -76,7 +76,7 @@ function DashboardLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-slate-100 flex">
-      <aside className="hidden lg:flex w-72 bg-slate-950 text-white flex-col">
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-72 bg-slate-950 text-white flex-col overflow-hidden">
         <div className="p-6 border-b border-slate-800">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-blue-600 flex items-center justify-center">
@@ -89,7 +89,7 @@ function DashboardLayout({ children }) {
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-4 space-y-2 overflow-hidden">
           {links.map((item) => {
             const Icon = item.icon;
 
@@ -120,7 +120,7 @@ function DashboardLayout({ children }) {
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 bg-red-500/10 text-red-300 py-3 rounded-xl hover:bg-red-500/20"
+            className="w-full flex items-center justify-center gap-2 bg-red-600 text-white py-3 rounded-xl hover:bg-red-700 transition-colors duration-200"
           >
             <LogOut size={18} />
             Logout
@@ -128,7 +128,7 @@ function DashboardLayout({ children }) {
         </div>
       </aside>
 
-      <main className="flex-1">
+      <main className="flex-1 lg:ml-72">
         <div className="lg:hidden bg-slate-950 text-white p-4 flex justify-between items-center">
           <div>
             <h1 className="font-bold">Weekly Report</h1>
@@ -137,7 +137,7 @@ function DashboardLayout({ children }) {
 
           <button
             onClick={handleLogout}
-            className="bg-red-500/10 text-red-300 px-3 py-2 rounded-lg text-sm"
+            className="bg-red-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-red-700 transition-colors duration-200"
           >
             Logout
           </button>

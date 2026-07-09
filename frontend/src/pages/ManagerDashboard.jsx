@@ -24,8 +24,28 @@ import StatCard from "../components/StatCard";
 import axiosInstance from "../api/axiosInstance";
 import { useAuth } from "../context/AuthContext";
 
+const getCurrentWeekRange = () => {
+  const today = new Date();
+  const currentDay = today.getDay();
+  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() + mondayOffset);
+
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+
+  const formatDate = (date) => date.toISOString().split("T")[0];
+
+  return {
+    weekStartDate: formatDate(weekStart),
+    weekEndDate: formatDate(weekEnd),
+  };
+};
+
 function ManagerDashboard() {
   const { user } = useAuth();
+  const { weekStartDate, weekEndDate } = getCurrentWeekRange();
 
   const [summary, setSummary] = useState(null);
   const [submissionStatus, setSubmissionStatus] = useState(null);
@@ -44,7 +64,9 @@ function ManagerDashboard() {
         trendResponse,
       ] = await Promise.all([
         axiosInstance.get("/dashboard/summary"),
-        axiosInstance.get("/dashboard/submission-status"),
+        axiosInstance.get("/dashboard/submission-status", {
+          params: { weekStartDate, weekEndDate },
+        }),
         axiosInstance.get("/dashboard/workload-by-project"),
         axiosInstance.get("/dashboard/tasks-trend"),
       ]);

@@ -340,7 +340,7 @@ function ManagerProjects() {
                                 : "bg-red-50 text-red-700"
                             }`}
                           >
-                            {project.isActive ? "ACTIVE" : "INACTIVE"}
+                            {project.isActive ? "ACTIVE" : "FINISHED"}
                           </span>
                         </td>
 
@@ -403,16 +403,25 @@ function ManagerProjects() {
                   />
                 </div>
 
-                <label className="flex items-center gap-3 text-sm text-slate-700">
-                  <input
-                    type="checkbox"
-                    name="isActive"
-                    checked={formData.isActive}
-                    onChange={handleChange}
-                    className="h-4 w-4 rounded border-slate-300"
-                  />
-                  Project is active
-                </label>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-2">
+                    Project Status
+                  </label>
+
+                  <select
+                    value={formData.isActive ? "ACTIVE" : "FINISHED"}
+                    onChange={(event) =>
+                      setFormData({
+                        ...formData,
+                        isActive: event.target.value === "ACTIVE",
+                      })
+                    }
+                    className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm bg-white"
+                  >
+                    <option value="ACTIVE">Active</option>
+                    <option value="FINISHED">Finished</option>
+                  </select>
+                </div>
 
                 <div className="flex gap-3">
                   <button

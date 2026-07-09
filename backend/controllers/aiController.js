@@ -1,13 +1,8 @@
 const { Op } = require("sequelize");
-const OpenAI = require("openai");
 
 const WeeklyReport = require("../models/weeklyReport");
 const User = require("../models/user");
 const Project = require("../models/project");
-
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 const getReportWhereCondition = (filters) => {
   const { weekStartDate, weekEndDate, projectId, userId } = filters;
@@ -86,13 +81,14 @@ const fetchSubmittedReports = async (filters) => {
 };
 
 const callAI = async ({ question, context }) => {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error("OPENAI_API_KEY is missing in .env file");
+  const apiKey = process.env.GEMINI_API_KEY;
+  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is missing in .env file");
   }
 
-  const response = await client.responses.create({
-    model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
-    instructions: `
+  const systemInstruction = `
 You are an AI assistant for a Weekly Report Generator system.
 
 Your job:
@@ -102,19 +98,55 @@ Your job:
 - If the answer is not available in the context, say that the data is not available.
 - Do not invent team members, projects, dates, tasks, or blockers.
 - Keep the answer clear, professional, and useful for a manager.
-    `.trim(),
-    input: `
+  `.trim();
+
+  const prompt = `
 Manager question:
 ${question}
 
 Retrieved weekly report context:
 ${context}
-    `.trim(),
-    temperature: 0.2,
-    max_output_tokens: 700,
-  });
+  `.trim();
 
-  return response.output_text || "AI response could not be generated.";
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        systemInstruction: {
+          parts: [{ text: systemInstruction }],
+        },
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: prompt }],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 700,
+        },
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    const message =
+      data?.error?.message || "Failed to generate AI response with Gemini";
+    throw new Error(message);
+  }
+
+  const text = data?.candidates?.[0]?.content?.parts
+    ?.map((part) => part.text || "")
+    .join("")
+    .trim();
+
+  return text || "AI response could not be generated.";
 };
 
 // POST /api/ai/chat
